@@ -1,4 +1,6 @@
-
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import React from "react";
 import { Link, Outlet } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -7,12 +9,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Package, Heart, Settings } from "lucide-react";
 
 const Account = () => {
+  const { user, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      navigate("/login");
+    }
+  }, [user, isLoading, navigate]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    return null;
+  }
+
   // Mock user data - in a real app, this would come from an authentication context
-  const user = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop",
-  };
+  // const user = {
+  //   name: "John Doe",
+  //   email: "john.doe@example.com",
+  //   avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop",
+  // };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -22,16 +41,16 @@ const Account = () => {
           <div className="flex items-center gap-4 mb-8">
             <div className="w-16 h-16 rounded-full overflow-hidden">
               <img 
-                src={user.avatar} 
-                alt={user.name} 
+                src={user?.user_metadata?.avatar_url || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop"} 
+                alt={user?.user_metadata?.first_name || "User Avatar"}
                 className="w-full h-full object-cover"
               />
             </div>
             <div>
               <h1 className="text-2xl md:text-3xl font-semibold text-clearpulse-green">
-                {user.name}
+                {user?.user_metadata?.first_name || "Your Account"}
               </h1>
-              <p className="text-gray-600">{user.email}</p>
+              <p className="text-gray-600">{user?.email}</p>
             </div>
           </div>
 
@@ -62,15 +81,15 @@ const Account = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                    <p className="p-2 bg-gray-50 rounded-md border">John</p>
+                    <p className="p-2 bg-gray-50 rounded-md border">{user?.user_metadata?.first_name || "N/A"}</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                    <p className="p-2 bg-gray-50 rounded-md border">Doe</p>
+                    <p className="p-2 bg-gray-50 rounded-md border">{user?.user_metadata?.last_name || "N/A"}</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                    <p className="p-2 bg-gray-50 rounded-md border">{user.email}</p>
+                    <p className="p-2 bg-gray-50 rounded-md border">{user?.email}</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>

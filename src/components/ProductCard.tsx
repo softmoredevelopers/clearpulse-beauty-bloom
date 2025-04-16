@@ -4,12 +4,25 @@ import { ShoppingBag, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProductType } from "@/data/products";
+import { useShoppingCart } from "@/context/ShoppingCartContext";
 
 interface ProductCardProps {
   product: ProductType;
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
+  const { addToCart, addToWishlist, isInWishlist } = useShoppingCart();
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    addToCart(product);
+  };
+
+  const handleAddToWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    addToWishlist(product);
+  };
+
   return (
     <div className="group relative bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md">
       {/* Product Image */}
@@ -33,10 +46,14 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
       {/* Wishlist Button */}
       <button 
-        className="absolute top-4 right-4 bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm hover:bg-clearpulse-cream"
+        className={`absolute top-4 right-4 bg-white rounded-full p-2 transition-all shadow-sm hover:bg-clearpulse-cream ${isInWishlist(product.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
         aria-label="Add to wishlist"
+        onClick={handleAddToWishlist}
       >
-        <Heart size={18} className="text-clearpulse-green" />
+        <Heart 
+          size={18} 
+          className={isInWishlist(product.id) ? "text-red-500 fill-red-500" : "text-clearpulse-green"} 
+        />
       </button>
 
       {/* Product Info */}
@@ -52,7 +69,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
         </div>
         
         {/* Add to Cart Button */}
-        <Button className="w-full bg-clearpulse-green hover:bg-clearpulse-green/90 text-white flex items-center justify-center gap-2">
+        <Button 
+          className="w-full bg-clearpulse-green hover:bg-clearpulse-green/90 text-white flex items-center justify-center gap-2"
+          onClick={handleAddToCart}
+        >
           <ShoppingBag size={16} />
           <span>Add to Cart</span>
         </Button>

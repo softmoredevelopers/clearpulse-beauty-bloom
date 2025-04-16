@@ -1,53 +1,31 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from "lucide-react";
-
-// Mock cart data
-const initialCartItems = [
-  {
-    id: "neem-turmeric-face-wash",
-    name: "Neem & Turmeric Face Wash",
-    price: 24.99,
-    quantity: 1,
-    image: "https://images.unsplash.com/photo-1556229010-6c3f2c9ca5f8?w=200&auto=format&fit=crop"
-  },
-  {
-    id: "saffron-glow-serum",
-    name: "Saffron Glow Serum",
-    price: 39.99,
-    quantity: 2,
-    image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=200&auto=format&fit=crop"
-  }
-];
+import { useShoppingCart } from "@/context/ShoppingCartContext";
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState(initialCartItems);
-  const [promoCode, setPromoCode] = useState("");
-  const [isPromoApplied, setIsPromoApplied] = useState(false);
+  const { 
+    cartItems, 
+    cartTotal, 
+    removeFromCart, 
+    updateQuantity, 
+    clearCart 
+  } = useShoppingCart();
+  
+  const [promoCode, setPromoCode] = React.useState("");
+  const [isPromoApplied, setIsPromoApplied] = React.useState(false);
   
   // Calculate cart totals
-  const subtotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+  const subtotal = cartTotal;
   const discount = isPromoApplied ? subtotal * 0.10 : 0; // 10% discount when promo is applied
   const shipping = subtotal > 50 ? 0 : 5.99; // Free shipping on orders over $50
   const tax = (subtotal - discount) * 0.08; // 8% tax
   const total = subtotal - discount + shipping + tax;
-  
-  const updateQuantity = (id: string, newQuantity: number) => {
-    if (newQuantity < 1) return;
-    
-    setCartItems(cartItems.map(item => 
-      item.id === id ? { ...item, quantity: newQuantity } : item
-    ));
-  };
-  
-  const removeItem = (id: string) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
-  };
   
   const applyPromoCode = () => {
     if (promoCode.toLowerCase() === "welcome10") {
@@ -87,25 +65,25 @@ const Cart = () => {
                   </div>
                   
                   {cartItems.map((item) => (
-                    <div key={item.id} className="p-4 border-b last:border-b-0">
+                    <div key={item.product.id} className="p-4 border-b last:border-b-0">
                       <div className="grid grid-cols-12 gap-4 items-center">
                         <div className="col-span-6 flex items-center">
                           <div className="w-20 h-20 rounded-md overflow-hidden flex-shrink-0">
                             <img 
-                              src={item.image} 
-                              alt={item.name} 
+                              src={item.product.image} 
+                              alt={item.product.name} 
                               className="w-full h-full object-cover"
                             />
                           </div>
                           <div className="ml-4">
                             <Link 
-                              to={`/product/${item.id}`}
+                              to={`/product/${item.product.id}`}
                               className="font-medium hover:text-clearpulse-green transition-colors"
                             >
-                              {item.name}
+                              {item.product.name}
                             </Link>
                             <button 
-                              onClick={() => removeItem(item.id)}
+                              onClick={() => removeFromCart(item.product.id)}
                               className="flex items-center text-sm text-red-500 hover:text-red-700 transition-colors mt-1"
                             >
                               <Trash2 size={14} className="mr-1" />
@@ -114,12 +92,12 @@ const Cart = () => {
                           </div>
                         </div>
                         <div className="col-span-2 text-center">
-                          ${item.price.toFixed(2)}
+                          ${item.product.price.toFixed(2)}
                         </div>
                         <div className="col-span-2 flex items-center justify-center">
                           <div className="flex items-center border rounded-md">
                             <button 
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
                               className="p-1 hover:bg-gray-100"
                               aria-label="Decrease quantity"
                             >
@@ -127,7 +105,7 @@ const Cart = () => {
                             </button>
                             <span className="px-2 py-1 w-8 text-center">{item.quantity}</span>
                             <button 
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
                               className="p-1 hover:bg-gray-100"
                               aria-label="Increase quantity"
                             >
@@ -136,7 +114,7 @@ const Cart = () => {
                           </div>
                         </div>
                         <div className="col-span-2 text-right font-medium">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          ${(item.product.price * item.quantity).toFixed(2)}
                         </div>
                       </div>
                     </div>
@@ -153,7 +131,7 @@ const Cart = () => {
                   </Link>
                   
                   <Button 
-                    onClick={() => setCartItems([])}
+                    onClick={() => clearCart()}
                     variant="outline"
                     className="border-clearpulse-green text-clearpulse-green hover:bg-clearpulse-green/10"
                   >

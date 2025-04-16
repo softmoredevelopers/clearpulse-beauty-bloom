@@ -172,3 +172,12 @@ export const getBestSellerProducts = () => {
 export const getNewProducts = () => {
   return products.filter(product => product.new);
 };
+
+// Add the missing functions
+export const getAllProducts = () => {
+  return products;
+};
+
+export const getProductById = (id: string) => {
+  return products.find(product => product.id === id) || null;
+};
